@@ -15,7 +15,7 @@ echo "[*] تثبيت أدوات live-build إن لم تكن موجودة..."
 apt-get update
 apt-get install -y live-build live-config live-boot debootstrap \
   dosfstools mtools squashfs-tools xorriso isolinux syslinux-efi grub-pc-bin \
-  grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates
+  grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates debian-archive-keyring
 
 echo "[*] تنظيف أي بناء سابق..."
 lb clean --purge || true
@@ -27,6 +27,10 @@ lb config \
   --architecture amd64 \
   --binary-images iso-hybrid \
   --archive-areas "main contrib non-free non-free-firmware" \
+  --mirror-bootstrap "http://deb.debian.org/debian/" \
+  --mirror-binary "http://deb.debian.org/debian/" \
+  --mirror-chroot "http://deb.debian.org/debian/" \
+  --mirror-chroot-security "http://deb.debian.org/debian-security/" \
   --debian-installer live \
   --bootappend-live "boot=live components quiet splash username=novaos hostname=novaos" \
   --iso-application "$DISTRO_LABEL" \
