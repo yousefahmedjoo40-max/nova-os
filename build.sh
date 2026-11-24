@@ -13,9 +13,20 @@ fi
 
 echo "[*] تثبيت أدوات live-build إن لم تكن موجودة..."
 apt-get update
-apt-get install -y live-build debootstrap \
+apt-get install -y curl debootstrap \
   dosfstools mtools squashfs-tools xorriso isolinux syslinux-efi grub-pc-bin \
   grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates debian-archive-keyring
+
+echo "[*] تثبيت live-build الحديث من Debian 12 (نسخة Ubuntu قديمة جداً)..."
+CUR_VER=$(dpkg-query -W -f='${Version}' live-build 2>/dev/null || echo "none")
+if [[ "$CUR_VER" != 1:202* ]]; then
+  BASE="http://deb.debian.org/debian/pool/main/l/live-build/"
+  DEB_NAME=$(curl -fsSL "$BASE" | grep -o 'live-build_20230502[^"<]*_all\.deb' | head -n1 || true)
+  [[ -z "$DEB_NAME" ]] && DEB_NAME="live-build_20230502_all.deb"
+  echo "[*] تحميل $DEB_NAME"
+  curl -fsSL -o /tmp/live-build.deb "${BASE}${DEB_NAME}"
+  apt-get install -y /tmp/live-build.deb
+fi
 
 LB_VER=$(dpkg-query -W -f='${Version}' live-build 2>/dev/null || echo "none")
 echo "[*] نسخة live-build: $LB_VER"
