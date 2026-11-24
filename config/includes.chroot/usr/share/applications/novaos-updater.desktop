@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=NovaOS Updater
+Name[ar]=محدّث NovaOS
+Comment=Check for and apply NovaOS system updates
+Exec=x-terminal-emulator -e python3 /opt/novaos/updater/updater.py check
+Icon=system-software-update
+Categories=System;
+Terminal=false

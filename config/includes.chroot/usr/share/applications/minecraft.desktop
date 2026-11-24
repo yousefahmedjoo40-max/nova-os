@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Minecraft
+Comment=Launch Minecraft via Prism Launcher (auto-setup on first run)
+Exec=/opt/novaos/minecraft/first-run.sh
+Icon=applications-games
+Categories=Game;
+Terminal=false

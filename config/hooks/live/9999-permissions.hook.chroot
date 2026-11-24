@@ -1,0 +1,15 @@
+#!/bin/bash
+# ضبط صلاحيات نهائية بعد كل الـ hooks الأخرى
+set -e
+
+chmod 700 /opt/novaos/ai-assistant/novaos-ai-set-key.sh /opt/novaos/ai-assistant/novaos-ai-get-key.sh
+chmod 700 /opt/novaos/thermalctl/novaos-thermal-set-mode.sh
+chmod 700 /opt/novaos/updater/novaos-apply-update.sh
+chmod 440 /etc/sudoers.d/novaos-helpers
+
+# المستخدم الافتراضي للـ Live/التثبيت يُضاف لمجموعات ضرورية
+if id -u novaos >/dev/null 2>&1; then
+  usermod -aG sudo,netdev,video,audio,plugdev novaos
+fi
+
+echo "[hook] تم ضبط الصلاحيات النهائية."

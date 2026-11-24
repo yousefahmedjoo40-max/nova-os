@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AI Assistant
+Name[ar]=المساعد الذكي
+Comment=Chat with Gemini to explain system errors and suggest commands
+Exec=python3 /opt/novaos/ai-assistant/ai_assistant.py
+Icon=dialog-information
+Categories=System;Utility;
+Terminal=false

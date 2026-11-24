@@ -1,0 +1,7 @@
+# NovaOS - صلاحيات محدودة جداً لسكربتات مساعدة فقط (وليس وصول root كامل)
+# تسمح لأي مستخدم في مجموعة sudo بتشغيل هذه الأدوات تحديداً بدون كلمة مرور
+# لأنها أدوات محصورة الوظيفة (كتابة/قراءة مفتاح، تطبيق تحديث، ضبط وضع الأداء).
+%sudo ALL=(root) NOPASSWD: /opt/novaos/ai-assistant/novaos-ai-set-key.sh
+%sudo ALL=(root) NOPASSWD: /opt/novaos/ai-assistant/novaos-ai-get-key.sh
+%sudo ALL=(root) NOPASSWD: /opt/novaos/thermalctl/novaos-thermal-set-mode.sh
+%sudo ALL=(root) NOPASSWD: /opt/novaos/updater/novaos-apply-update.sh

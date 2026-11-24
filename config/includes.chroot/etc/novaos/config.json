@@ -1,0 +1,19 @@
+{
+  "distro_name": "NovaOS",
+  "ai": {
+    "model": "gemini-3.5-flash-lite",
+    "api_key_path": "/etc/novaos/ai.key",
+    "api_base_url": "https://generativelanguage.googleapis.com/v1beta"
+  },
+  "updates": {
+    "supabase_url": "https://zihcdmcjvobwpyoxptvy.supabase.co",
+    "supabase_anon_key": "sb_publishable_KOGYifVupbRJobMZULu-Pg_IUbwjKEx",
+    "channel": "stable",
+    "apt_repo_base": "https://github.com/yousefahmedjoo40-max/nova-os.git"
+  },
+  "thermal": {
+    "default_mode": "balanced",
+    "fps_cap_default": 0
+  }
+}
+

@@ -1,0 +1,36 @@
+#!/bin/bash
+# تهيئة Calamares كمثبّت دائم على القرص
+set -e
+
+mkdir -p /etc/calamares/branding/novaos
+cat > /etc/calamares/branding/novaos/branding.desc << 'BRANDING'
+---
+componentName: novaos
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+
+windowExpanding: normal
+windowSize: 800px,520px
+
+strings:
+    productName: NovaOS
+    shortProductName: NovaOS
+    version: "1.0"
+    shortVersion: "1.0"
+    versionedName: "NovaOS 1.0"
+    shortVersionedName: "NovaOS 1.0"
+    bootloaderEntryName: NovaOS
+    productUrl: https://example.com/novaos
+    supportUrl: https://example.com/novaos/support
+
+slideshow: "show.qml"
+BRANDING
+
+# استخدام الإعدادات الافتراضية المرفقة من حزمة calamares-settings-debian
+# كأساس، مع تأكيد أن settings.conf يستدعي branding: novaos
+if [[ -f /etc/calamares/settings.conf ]]; then
+  sed -i 's/^branding:.*/branding: novaos/' /etc/calamares/settings.conf || true
+fi
+
+echo "[hook] Calamares تم تهيئته."

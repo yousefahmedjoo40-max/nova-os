@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ThermalCtl
+Name[ar]=إدارة الحرارة والأداء
+Comment=Monitor and control CPU/GPU temperature, fans and performance modes
+Exec=python3 /opt/novaos/thermalctl/thermalctl_gui.py
+Icon=sensors-temperature
+Categories=System;Monitor;
+Terminal=false

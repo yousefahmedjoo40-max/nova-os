@@ -1,0 +1,24 @@
+#!/bin/bash
+# تفعيل خدمات الحرارة/الأداء وتعطيل الخدمات غير الضرورية لتخفيف النظام
+set -e
+
+systemctl enable thermalctl.service
+systemctl enable thermald.service || true
+systemctl enable tlp.service || true
+systemctl enable auto-cpufreq || true
+systemctl enable novaos-updater.timer
+
+# zram بدل swap تقليدي لتخفيف الحمل
+if [[ -f /etc/default/zramswap ]]; then
+  sed -i 's/^PERCENT=.*/PERCENT=50/' /etc/default/zramswap || true
+fi
+
+# تعطيل خدمات غير ضرورية على نظام Live/خفيف
+for svc in bluetooth.service cups.service avahi-daemon.service ; do
+  systemctl disable "$svc" 2>/dev/null || true
+done
+
+mkdir -p /var/log/novaos /run/novaos
+chmod 755 /var/log/novaos
+
+echo "[hook] خدمات الحرارة والأداء جاهزة، والخدمات غير الضرورية معطّلة."

@@ -1,0 +1,28 @@
+#!/bin/bash
+# تفعيل NetworkManager كمدير شبكة افتراضي، وتعطيل التعارض مع ifupdown
+set -e
+
+systemctl enable NetworkManager.service
+systemctl enable ModemManager.service || true
+
+# تعطيل أي تعارض بين ifupdown و NetworkManager على واجهات الشبكة العادية
+if [[ -f /etc/network/interfaces ]]; then
+  cat > /etc/network/interfaces << 'IFACES'
+# تم ترك إدارة كل الواجهات لـ NetworkManager
+auto lo
+iface lo inet loopback
+IFACES
+fi
+
+# السماح لمستخدم المجموعة netdev بإدارة الشبكة من واجهة nm-applet بدون كلمة مرور متكررة
+mkdir -p /etc/polkit-1/localauthority/50-local.d
+cat > /etc/polkit-1/localauthority/50-local.d/45-nm.pkla << 'PKLA'
+[Allow network control for netdev group]
+Identity=unix-group:netdev
+Action=org.freedesktop.NetworkManager.*
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+PKLA
+
+echo "[hook] NetworkManager تم تفعيله."
