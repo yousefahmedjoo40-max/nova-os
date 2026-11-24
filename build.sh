@@ -15,7 +15,7 @@ echo "[*] تثبيت أدوات live-build إن لم تكن موجودة..."
 apt-get update
 apt-get install -y curl debootstrap \
   dosfstools mtools squashfs-tools xorriso isolinux syslinux-efi grub-pc-bin \
-  grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates debian-archive-keyring
+  grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates debian-archive-keyring syslinux syslinux-utils
 
 echo "[*] تثبيت live-build الحديث من Debian 12 (نسخة Ubuntu قديمة جداً)..."
 CUR_VER=$(dpkg-query -W -f='${Version}' live-build 2>/dev/null || echo "none")
@@ -70,6 +70,45 @@ lb config \
   --iso-publisher "NovaOS Project" \
   --memtest none \
   --win32-loader false
+
+echo "[*] ضبط صلاحيات سكربتات المشروع..."
+chmod +x config/hooks/live/*.hook.chroot 2>/dev/null || true
+find config/includes.chroot/opt -type f \( -name '*.sh' -o -name '*.py' \) -exec chmod +x {} + 2>/dev/null || true
+
+echo "[*] فحص الحزم مقابل مستودع Debian 12 (يحذف أي حزمة غير موجودة تلقائياً)..."
+python3 - << 'PYEOF'
+import glob, lzma, os, sys, urllib.request
+mirror = os.environ.get("DEBIAN_MIRROR", "http://deb.debian.org/debian")
+avail = set()
+try:
+    for area in ["main", "contrib", "non-free", "non-free-firmware"]:
+        url = f"{mirror}/dists/bookworm/{area}/binary-amd64/Packages.xz"
+        text = lzma.decompress(urllib.request.urlopen(url, timeout=90).read()).decode("utf-8", "ignore")
+        for line in text.splitlines():
+            if line.startswith("Package: "):
+                avail.add(line[9:].strip())
+            elif line.startswith("Provides: "):
+                for item in line[10:].split(","):
+                    avail.add(item.strip().split(" ")[0])
+except Exception as e:
+    print(f"[!] تعذّر فحص الحزم ({e}) - سنكمل بدون فحص")
+    sys.exit(0)
+
+for path in glob.glob("config/package-lists/*.list.chroot"):
+    kept, dropped = [], []
+    for line in open(path, encoding="utf-8").read().splitlines():
+        name = line.strip()
+        if not name or name.startswith("#"):
+            kept.append(line); continue
+        if name in avail:
+            kept.append(line)
+        else:
+            dropped.append(name)
+    open(path, "w", encoding="utf-8").write("\n".join(kept) + "\n")
+    for d in dropped:
+        print(f"[!] حزمة غير موجودة في Debian 12 وتم تخطيها: {d}")
+print("[✓] انتهى فحص الحزم")
+PYEOF
 
 echo "[*] بدء البناء... قد يأخذ وقتاً طويلاً."
 lb build 2>&1 | tee build.log
