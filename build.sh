@@ -31,6 +31,7 @@ lb config \
   --mirror-binary "http://deb.debian.org/debian/" \
   --mirror-chroot "http://deb.debian.org/debian/" \
   --mirror-chroot-security "http://deb.debian.org/debian-security/" \
+  --debootstrap-options "--keyring=/usr/share/keyrings/debian-archive-keyring.gpg --variant=minbase" \
   --debian-installer live \
   --bootappend-live "boot=live components quiet splash username=novaos hostname=novaos" \
   --iso-application "$DISTRO_LABEL" \
@@ -39,18 +40,14 @@ lb config \
   --memtest none \
   --win32-loader false
 
-# تأكيد وجود الأدوات الأساسية داخل chroot، خصوصاً /usr/bin/env.
+# debootstrap's minbase variant omits coreutils; live-build needs /usr/bin/env in chroot.
 mkdir -p config/package-lists
 if ! grep -qxF 'coreutils' config/package-lists/novaos.list.chroot; then
   sed -i '/# ===== نظام عام =====/a coreutils' config/package-lists/novaos.list.chroot
 fi
 
 echo "[*] بدء البناء... قد يأخذ وقتاً طويلاً."
-if ! lb build 2>&1 | tee build.log; then
-  echo "[!] فشل بناء live-build. محاولة متابعة التشخيص..." >&2
-  lb clean --purge >/dev/null 2>&1 || true
-  exit 1
-fi
+lb build 2>&1 | tee build.log
 
 ISO_FILE=$(ls -1 live-image-amd64.hybrid.iso 2>/dev/null || true)
 if [[ -z "$ISO_FILE" ]]; then
