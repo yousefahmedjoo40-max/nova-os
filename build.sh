@@ -17,6 +17,14 @@ apt-get install -y live-build debootstrap \
   dosfstools mtools squashfs-tools xorriso isolinux syslinux-efi grub-pc-bin \
   grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates debian-archive-keyring
 
+LB_VER=$(dpkg-query -W -f='${Version}' live-build 2>/dev/null || echo "none")
+echo "[*] نسخة live-build: $LB_VER"
+if [[ "$LB_VER" == 3.* || "$LB_VER" == "none" ]]; then
+  echo "[!] نسخة live-build قديمة جداً ولا تدعم Debian 12." >&2
+  echo "[!] غيّر runs-on في ملف الـ workflow إلى ubuntu-24.04" >&2
+  exit 1
+fi
+
 echo "[*] التأكد من مفتاح توقيع Debian..."
 if [[ ! -f /usr/share/keyrings/debian-archive-keyring.gpg ]]; then
   if [[ -f /usr/share/keyrings/debian-archive-keyring.pgp ]]; then
@@ -50,7 +58,6 @@ lb config \
   --iso-volume "$DISTRO_LABEL" \
   --iso-publisher "NovaOS Project" \
   --memtest none \
-  --chroot-squashfs-compression-type xz \
   --win32-loader false
 
 echo "[*] بدء البناء... قد يأخذ وقتاً طويلاً."
