@@ -1,0 +1,85 @@
+name: Publish NovaOS App Update
+
+# يتفعّل تلقائياً فقط لما تتغيّر ملفات التطبيقات نفسها أو ملف VERSION
+# (مش لما تتغيّر الدوكس أو ملفات بناء الإيزو الكاملة)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "VERSION"
+      - "config/includes.chroot/opt/novaos/**"
+      - "config/includes.chroot/usr/share/applications/**"
+      - "config/includes.chroot/etc/systemd/system/**"
+      - "packaging/**"
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: echo "version=$(cat VERSION | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Build .deb package
+        run: |
+          chmod +x packaging/build-deb.sh
+          ./packaging/build-deb.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Compute SHA256
+        id: sha
+        run: |
+          DEB="novaos-apps_${{ steps.ver.outputs.version }}.deb"
+          echo "sha256=$(sha256sum "$DEB" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "deb_path=$DEB" >> "$GITHUB_OUTPUT"
+
+      - name: Install minisign
+        run: sudo apt-get update && sudo apt-get install -y minisign
+
+      - name: Sign package with minisign
+        env:
+          MINISIGN_SECRET_KEY_B64: ${{ secrets.MINISIGN_SECRET_KEY_B64 }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+        run: |
+          echo "$MINISIGN_SECRET_KEY_B64" | base64 -d > /tmp/novaos.key
+          minisign -S -s /tmp/novaos.key -m "${{ steps.sha.outputs.deb_path }}" \
+            -x "${{ steps.sha.outputs.deb_path }}.minisig" \
+            < <(printf '%s\n' "$MINISIGN_PASSWORD")
+          shred -u /tmp/novaos.key
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: update-v${{ steps.ver.outputs.version }}
+          name: NovaOS apps update v${{ steps.ver.outputs.version }}
+          files: |
+            ${{ steps.sha.outputs.deb_path }}
+            ${{ steps.sha.outputs.deb_path }}.minisig
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Register update in Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          SHA256: ${{ steps.sha.outputs.sha256 }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/download/update-v${{ steps.ver.outputs.version }}
+        run: |
+          curl -sSf -X POST "$SUPABASE_URL/rest/v1/updates" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "$(jq -n \
+                  --arg version "$VERSION" \
+                  --arg channel "stable" \
+                  --arg release_url "$RELEASE_URL" \
+                  --arg sha256 "$SHA256" \
+                  --arg notes "تحديث تلقائي عبر GitHub Actions" \
+                  '{version:$version, channel:$channel, release_url:$release_url, sha256:$sha256, notes:$notes}')"
+          echo "[✓] تم تسجيل النسخة $VERSION في Supabase."
