@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -17,44 +17,41 @@ jobs:
 
       - name: Free up disk space
         run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
-          sudo docker image prune -a -f || true
-
-      - name: Install live-build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y live-build live-config live-boot debootstrap \
-            dosfstools mtools squashfs-tools xorriso isolinux syslinux-efi \
-            grub-pc-bin grub-efi-amd64-bin grub-efi-ia32-bin ca-certificates
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          df -h /
 
       - name: Build ISO
-        working-directory: .
         run: |
-          chmod +x ./build.sh
+          chmod +x build.sh
           sudo ./build.sh
 
-      - name: Locate ISO artifact
-        id: locate
+      - name: Prepare release files
         run: |
-          ISO_PATH=$(ls -1 novaos-*.iso | head -n1)
-          SHA_PATH="${ISO_PATH}.sha256"
-          echo "iso_path=$ISO_PATH" >> "$GITHUB_OUTPUT"
-          echo "sha_path=$SHA_PATH" >> "$GITHUB_OUTPUT"
+          ISO=$(ls -1 novaos-*.iso | head -n1)
+          mkdir -p release
+          cp "${ISO}.sha256" release/
+          if [ "$(stat -c%s "$ISO")" -gt 2000000000 ]; then
+            split -b 1900M -d "$ISO" "release/${ISO}.part"
+            echo "cat ${ISO}.part* > ${ISO}" > release/JOIN-INSTRUCTIONS.txt
+          else
+            mv "$ISO" release/
+          fi
+          ls -lh release
 
-      - name: Upload build log (for debugging)
+      - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ${{ steps.locate.outputs.iso_path }}
-            ${{ steps.locate.outputs.sha_path }}
+          tag_name: ${{ github.ref_name }}
+          files: release/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
