@@ -1,22 +1,21 @@
-# ===== سطح المكتب (خفيف: XFCE) =====
+# ===== سطح المكتب XFCE =====
 task-xfce-desktop
 xfce4-goodies
+xfce4-terminal
 lightdm
 lightdm-gtk-greeter
 xfce4-power-manager
+firefox-esr
 
-# ===== الجرافيكس والدرايفرات =====
+# ===== الجرافيكس =====
 mesa-vulkan-drivers
 mesa-utils
 vulkan-tools
 libgl1-mesa-dri
 xserver-xorg-video-all
 firmware-misc-nonfree
-firmware-linux
-firmware-linux-nonfree
 firmware-amd-graphics
-nvidia-driver
-nvidia-detect
+# nvidia-driver  (فعّله لاحقاً بعد نجاح أول بيلد - يزيد الحجم كثير)
 
 # ===== الشبكة =====
 network-manager
@@ -37,13 +36,13 @@ fancontrol
 tlp
 tlp-rdw
 thermald
-auto-cpufreq
 cpufrequtils
 mangohud
 python3-gi
 gir1.2-gtk-3.0
 python3-psutil
 python3-requests
+minisign
 
 # ===== أدوات VM =====
 virtualbox-guest-x11
@@ -53,7 +52,7 @@ qemu-guest-agent
 open-vm-tools
 open-vm-tools-desktop
 
-# ===== تثبيت الدسكتوب للتثبيت الدائم =====
+# ===== المثبّت =====
 calamares
 calamares-settings-debian
 
@@ -68,10 +67,8 @@ zram-tools
 htop
 neofetch
 flatpak
-openjdk-21-jre-headless
-openjdk-21-jdk-headless
+openjdk-17-jre-headless
 gamemode
 
-# ===== Blender / GIMP (اختياري - يزيد الحجم. فعّلها بإزالة # إذا أردت) =====
 #blender
 #gimp

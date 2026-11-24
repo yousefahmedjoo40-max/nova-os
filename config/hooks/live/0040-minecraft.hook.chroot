@@ -5,9 +5,6 @@ set -e
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
 # نضيف التثبيت الفعلي هنا (يتطلب اتصال إنترنت وقت بناء الـ ISO)؛
 # إن لم يتوفر اتصال، سيُنفَّذ أول مرة من سكربت first-run.sh بدلاً من ذلك.
-flatpak install -y --noninteractive flathub org.prismlauncher.PrismLauncher || \
-  echo "[hook] تعذّر تثبيت Prism Launcher أثناء البناء (سيحاول first-run.sh لاحقاً)."
-
 chmod +x /opt/novaos/minecraft/first-run.sh
 
 mkdir -p /etc/skel/.config/autostart
