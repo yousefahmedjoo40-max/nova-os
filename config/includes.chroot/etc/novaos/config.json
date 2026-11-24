@@ -6,14 +6,13 @@
     "api_base_url": "https://generativelanguage.googleapis.com/v1beta"
   },
   "updates": {
-    "supabase_url": "https://zihcdmcjvobwpyoxptvy.supabase.co",
-    "supabase_anon_key": "sb_publishable_KOGYifVupbRJobMZULu-Pg_IUbwjKEx",
+    "supabase_url": "https://YOUR-PROJECT-REF.supabase.co",
+    "supabase_anon_key": "PUT_YOUR_ANON_KEY_HERE",
     "channel": "stable",
-    "apt_repo_base": "https://github.com/yousefahmedjoo40-max/nova-os.git"
+    "apt_repo_base": "https://YOUR_GITHUB_USERNAME.github.io/novaos-apt"
   },
   "thermal": {
     "default_mode": "balanced",
     "fps_cap_default": 0
   }
 }
-
