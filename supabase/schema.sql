@@ -40,3 +40,6 @@ create policy "updates_no_public_write"
 -- استخدم فقط SUPABASE_URL و anon key داخل /etc/novaos/config.json،
 -- والـ service_role key يُستخدم فقط من بيئة CI/CD (GitHub Actions secrets)
 -- عند إضافة إصدار جديد لجدول updates.
+
+-- نوع التحديث: fix (إصلاح) | feature (إضافة) | security (أمان)
+alter table public.updates add column if not exists kind text not null default 'feature';
