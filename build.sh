@@ -39,8 +39,18 @@ lb config \
   --memtest none \
   --win32-loader false
 
+# تأكيد وجود الأدوات الأساسية داخل chroot، خصوصاً /usr/bin/env.
+mkdir -p config/package-lists
+if ! grep -qxF 'coreutils' config/package-lists/novaos.list.chroot; then
+  sed -i '/# ===== نظام عام =====/a coreutils' config/package-lists/novaos.list.chroot
+fi
+
 echo "[*] بدء البناء... قد يأخذ وقتاً طويلاً."
-lb build 2>&1 | tee build.log
+if ! lb build 2>&1 | tee build.log; then
+  echo "[!] فشل بناء live-build. محاولة متابعة التشخيص..." >&2
+  lb clean --purge >/dev/null 2>&1 || true
+  exit 1
+fi
 
 ISO_FILE=$(ls -1 live-image-amd64.hybrid.iso 2>/dev/null || true)
 if [[ -z "$ISO_FILE" ]]; then
