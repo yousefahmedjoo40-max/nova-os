@@ -30,6 +30,7 @@ jobs:
       - name: Build ISO
         working-directory: .
         run: |
+          chmod +x ./build.sh
           sudo ./build.sh
 
       - name: Locate ISO artifact
