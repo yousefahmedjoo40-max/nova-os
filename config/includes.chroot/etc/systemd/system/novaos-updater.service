@@ -1,9 +1,9 @@
 [Unit]
-Description=NovaOS Updater - Check for updates
+Description=NovaOS Updater - Check and apply updates
 Wants=network-online.target
 After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /opt/novaos/updater/updater.py check
+ExecStart=/usr/bin/python3 /opt/novaos/updater/updater.py apply
 User=root

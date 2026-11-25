@@ -45,8 +45,6 @@ python3-requests
 minisign
 
 # ===== أدوات VM =====
-virtualbox-guest-x11
-virtualbox-guest-utils
 spice-vdagent
 qemu-guest-agent
 open-vm-tools
@@ -55,6 +53,17 @@ open-vm-tools-desktop
 # ===== المثبّت =====
 calamares
 calamares-settings-debian
+# أدوات تقسيم القرص والتثبيت بجانب ويندوز/لينكس بدون فورمات
+ntfs-3g
+os-prober
+parted
+gparted
+cryptsetup
+efibootmgr
+grub-common
+grub2-common
+grub-pc-bin
+grub-efi-amd64-bin
 
 # ===== نظام عام =====
 sudo
@@ -63,6 +72,7 @@ wget
 git
 gnupg
 policykit-1
+unattended-upgrades
 zram-tools
 htop
 neofetch

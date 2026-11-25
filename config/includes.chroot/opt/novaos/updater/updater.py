@@ -41,6 +41,13 @@ def version_tuple(v):
     return tuple(parts)
 
 
+def _supabase_headers(key):
+    headers = {"apikey": key}
+    if key.startswith("eyJ"):  # مفتاح JWT قديم (anon)؛ المفاتيح الجديدة sb_... تُرسل في apikey فقط
+        headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
 def fetch_latest_update(supabase_url, anon_key, channel):
     """يستعلم REST API الخاص بـ Supabase عن أحدث صف في channel معيّن."""
     endpoint = (
@@ -49,10 +56,7 @@ def fetch_latest_update(supabase_url, anon_key, channel):
     )
     req = urllib.request.Request(
         endpoint,
-        headers={
-            "apikey": anon_key,
-            "Authorization": f"Bearer {anon_key}",
-        },
+        headers=_supabase_headers(anon_key),
     )
     with urllib.request.urlopen(req, timeout=15) as resp:
         rows = json.loads(resp.read().decode("utf-8"))
@@ -111,6 +115,7 @@ def check_and_apply(dry_run=False):
         return
 
     print(f"[*] يوجد تحديث جديد: {latest_version}")
+    print(f"    النوع: {row.get('kind', 'feature')}")
     print(f"    ملاحظات: {row.get('notes', '-')}")
 
     if dry_run:
@@ -118,7 +123,7 @@ def check_and_apply(dry_run=False):
         return
 
     os.makedirs(CACHE_DIR, exist_ok=True)
-    deb_name = f"novaos_{latest_version}.deb"
+    deb_name = f"novaos-apps_{latest_version}.deb"
     deb_path = os.path.join(CACHE_DIR, deb_name)
     sig_path = deb_path + ".minisig"
 
@@ -177,7 +182,7 @@ def rollback():
     with open(backup_marker) as f:
         prev_version = f.read().strip()
     print(f"[*] محاولة التراجع إلى النسخة: {prev_version}")
-    prev_deb = os.path.join(CACHE_DIR, f"novaos_{prev_version}.deb")
+    prev_deb = os.path.join(CACHE_DIR, f"novaos-apps_{prev_version}.deb")
     if not os.path.exists(prev_deb):
         print(f"[!] ملف الحزمة السابقة غير موجود في الكاش: {prev_deb}", file=sys.stderr)
         sys.exit(1)

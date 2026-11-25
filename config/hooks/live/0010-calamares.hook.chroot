@@ -33,4 +33,20 @@ if [[ -f /etc/calamares/settings.conf ]]; then
   sed -i 's/^branding:.*/branding: novaos/' /etc/calamares/settings.conf || true
 fi
 
+# عرض كل خيارات التقسيم (مسح القرص / التثبيت بجانب النظام الحالي / يدوي)
+PC=/etc/calamares/modules/partition.conf
+if [[ -f "$PC" ]]; then
+  if grep -q '^initialPartitioningChoice' "$PC"; then
+    sed -i 's/^initialPartitioningChoice:.*/initialPartitioningChoice: none/' "$PC"
+  else
+    echo 'initialPartitioningChoice: none' >> "$PC"
+  fi
+fi
+
+# GRUB: اكتشاف ويندوز/لينكس الموجودين وإظهارهم في قائمة الإقلاع (معطّل افتراضياً في Debian 12)
+mkdir -p /etc/default
+touch /etc/default/grub
+sed -i '/^GRUB_DISABLE_OS_PROBER/d' /etc/default/grub
+echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
+
 echo "[hook] Calamares تم تهيئته."
