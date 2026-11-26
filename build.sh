@@ -1,9 +1,9 @@
 #!/bin/bash
-# build.sh - NovaOS ISO builder (Debian 12 Bookworm live-build)
+# build.sh - NeonOS ISO builder (Debian 12 Bookworm live-build)
 set -euo pipefail
 
-DISTRO_NAME="novaos"
-DISTRO_LABEL="NovaOS"
+DISTRO_NAME="neonos"
+DISTRO_LABEL="NeonOS"
 BOOKWORM="bookworm"
 
 if [[ $EUID -ne 0 ]]; then
@@ -64,10 +64,10 @@ lb config \
   --binary-images iso-hybrid \
   --archive-areas "main contrib non-free non-free-firmware" \
   --debian-installer none \
-  --bootappend-live "boot=live components quiet splash username=novaos hostname=novaos" \
+  --bootappend-live "boot=live components quiet splash username=neon hostname=neonos" \
   --iso-application "$DISTRO_LABEL" \
   --iso-volume "$DISTRO_LABEL" \
-  --iso-publisher "NovaOS Project" \
+  --iso-publisher "NeonOS Project" \
   --memtest none \
   --win32-loader false
 
